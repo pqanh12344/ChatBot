@@ -20,7 +20,7 @@ This project implements a **Retrieval-Augmented Generation (RAG)** chatbot using
   - Transformers (`distilgpt2`) for text generation
   - LangChain for text splitting
 - **Vector Search**: FAISS for efficient similarity search
-- **Other Libraries**: NumPy, Pandas, TQDM, Torch, Re, Logging
+- **Other Libraries**: NumPy, Pandas, Torch, Re, Logging
 
 ## Installation
 
@@ -122,19 +122,8 @@ tqdm
 - GPU acceleration for faster embedding and inference.
 - Enhanced UI with real-time typing indicators and richer formatting.
 
-## Contributing
-Contributions are welcome! Please follow these steps:
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/your-feature`).
-3. Commit your changes (`git commit -m "Add your feature"`).
-4. Push to the branch (`git push origin feature/your-feature`).
-5. Open a Pull Request.
-
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
 ## Contact
 For questions or feedback, please open an issue on the repository or contact the maintainers.
 
 ---
-Built with ❤️ by [Your Name/Team]
+Built with ❤️ by Phan Quoc Anh
