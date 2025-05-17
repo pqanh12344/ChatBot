@@ -71,7 +71,7 @@ tqdm
 ## Usage
 1. **Run the Application**:
    ```bash
-   streamlit run app.py
+   streamlit run ui.py
    ```
    This will launch the Streamlit web interface in your default browser.
 
@@ -85,7 +85,7 @@ tqdm
 
 ## Project Structure
 ```plaintext
-├── app.py                  # Main application script
+├── ui.py                  # Main application script
 ├── data/                   # Directory for dataset files
 │   ├── viquad.contexts
 │   ├── viquad.questions
