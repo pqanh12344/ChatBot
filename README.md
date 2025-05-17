@@ -1,4 +1,4 @@
-# Chatbot RAG: A Retrieval-Augmented Generation Chatbot
+# Chatbot RAG: A Retrieval-Augmented Generation
 
 ## Overview
 This project implements a **Retrieval-Augmented Generation (RAG)** chatbot using Python, Streamlit, and state-of-the-art NLP models. The chatbot leverages a combination of document retrieval and text generation to provide accurate and contextually relevant answers to user queries, specifically tailored for Vietnamese language datasets like ViQuAD. It features a user-friendly web interface, efficient document processing, and robust error handling.
