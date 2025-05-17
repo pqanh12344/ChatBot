@@ -173,7 +173,7 @@ def main():
     if 'initialized' not in st.session_state:
         with st.spinner("Đang tải dữ liệu và mô hình..."):
             try:
-                pdf_path = 'D:/5.11.2022/baitap_bosung_TIEULUAN MON HOC.pdf'
+                pdf_path = './file.pdf'
                 contexts = load_documents(pdf_path)
 
                 text_splitter = RecursiveCharacterTextSplitter(chunk_size=256, chunk_overlap=20)
