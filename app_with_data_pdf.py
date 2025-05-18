@@ -6,17 +6,59 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import numpy as np
 import gc
 import faiss
-from transformers import pipeline, AutoModelForCausalLM, AutoTokenizer
 import re
 import logging
 import torch
 from typing import List, Tuple
 import time
+import requests
 import PyPDF2
 
 # Thiết lập logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Cấu hình API
+API_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-Instruct-v0.1"
+
+def query(payload):
+    """Gửi yêu cầu đến API Hugging Face"""
+    # Thay 'YOUR_API_KEY' bằng API Key thực tế từ Hugging Face
+    API_KEY = 'YOUR_API_KEY'
+    headers = {
+        "Authorization": f"Bearer {API_KEY}"
+    }
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
+
+def generate_answer(prompt: str) -> str:
+    """Tạo câu trả lời bằng cách gọi API Mixtral-8x7B"""
+    prompt_with_marker = prompt + "\nTrả lời:"
+    payload = {
+        "inputs": prompt_with_marker,
+        "parameters": {
+            "max_new_tokens": 1000,
+            "temperature": 0.3,
+            "top_p": 0.9,
+            "do_sample": True,
+            "num_beams": 2
+        }
+    }
+    output = query(payload)
+    if isinstance(output, dict) and 'error' in output:
+        return f"API error: {output['error']}"
+    elif isinstance(output, list) and len(output) > 0 and 'generated_text' in output[0]:
+        generated_text = output[0]['generated_text'].strip()
+        marker_index = generated_text.find("\nTrả lời:")
+        if marker_index != -1:
+            answer = generated_text[marker_index + len("\nTrả lời:"):].strip()
+            if not answer:
+                return "Không có câu trả lời được tạo ra."
+        else:
+            return "Không tìm thấy câu trả lời."
+        return answer
+    else:
+        return "Error: Unexpected API response format."
 
 # Hàm xử lý văn bản
 def preprocess_text(text: str) -> str:
@@ -106,7 +148,7 @@ def custom_retrieval(query: str, documents: List[str], doc_embeddings: np.ndarra
         return []
 
 # Trả lời câu hỏi
-def answer_question(query: str, documents: List[str], doc_embeddings: np.ndarray, metadata: List[dict], model, generator, language: str = "vi") -> Tuple[str, List[Tuple[str, dict]]]:
+def answer_question(query: str, documents: List[str], doc_embeddings: np.ndarray, metadata: List[dict], model, language: str = "vi") -> Tuple[str, List[Tuple[str, dict]]]:
     try:
         start_time = time.time()
         retrieved_docs = custom_retrieval(query, documents, doc_embeddings, metadata, model)
@@ -115,13 +157,12 @@ def answer_question(query: str, documents: List[str], doc_embeddings: np.ndarray
 
         context = " ".join([doc for doc, _ in retrieved_docs[:3]])
         prompt = (
-            f"Ngữ cảnh: {context}\n"
-            f"Câu hỏi: {query}\n"
-            f"Trả lời: Hãy viết câu trả lời theo Ngữ cảnh"
+            f"Bạn là một chuyên gia thông tin, luôn sẵn sàng cung cấp câu trả lời chính xác và ngắn gọn.\n"
+            f"Dựa trên thông tin sau đây: {context}\n"
+            f"Câu hỏi của người dùng: {query}\n"
         )
 
-        outputs = generator(prompt, max_new_tokens=50, temperature=0.3, top_p=0.9, do_sample=True, num_beams=2)
-        answer = outputs[0]["generated_text"].strip()
+        answer = generate_answer(prompt)
 
         elapsed_time = time.time() - start_time
         if elapsed_time < 1:
@@ -136,7 +177,7 @@ def chatbot_rag(query_text: str = None, language: str = "vi") -> Tuple[str, str]
     try:
         if not query_text:
             return "Vui lòng nhập câu hỏi.", ""
-        answer, sources = answer_question(query_text, st.session_state.chunks, st.session_state.embeddings, st.session_state.metadata, st.session_state.model, st.session_state.generator, language)
+        answer, sources = answer_question(query_text, st.session_state.chunks, st.session_state.embeddings, st.session_state.metadata, st.session_state.model, language)
         source_text = sources[0][0] if sources else "Không tìm thấy nguồn."
         return answer, source_text
     except Exception as e:
@@ -181,26 +222,6 @@ def main():
 
                 model_path = 'halong_embedding'
                 st.session_state.embeddings = create_embeddings(st.session_state.chunks, model_path)
-
-                model_name = "distilgpt2"
-                tokenizer = AutoTokenizer.from_pretrained(model_name)
-                model_llm = AutoModelForCausalLM.from_pretrained(
-                    model_name,
-                    device_map="cpu",
-                    low_cpu_mem_usage=True,
-                    torch_dtype=torch.float32
-                )
-                st.session_state.generator = pipeline(
-                    "text-generation",
-                    model=model_llm,
-                    tokenizer=tokenizer,
-                    max_new_tokens=50,
-                    temperature=0.3,
-                    top_p=0.9,
-                    do_sample=True,
-                    num_beams=2,
-                    return_full_text=False
-                )
                 st.session_state.model = SentenceTransformer(model_path, device='cpu')
                 st.session_state.initialized = True
             except Exception as e:
