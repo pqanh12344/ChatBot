@@ -117,7 +117,7 @@ tqdm
 - **Hardware**: Optimized for CPU, which may be slower than GPU-based setups.
 - **Dataset Size**: Currently limited to processing the first 100 lines of input files for faster initialization.
 - **Language**: Primarily designed for Vietnamese (ViQuAD dataset), but can be adapted for other languages.
-- **Model Accuracy**: `distilgpt2` is lightweight but may not match the performance of larger models like GPT-3.
+- **Model Accuracy**: API model `Mixtral-8x7B-Instruct-v0.1` may not match the performance of larger models like GPT-3.
 
 ## Future Improvements
 - Support for larger datasets with pagination or streaming.
