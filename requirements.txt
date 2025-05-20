@@ -7,3 +7,4 @@ torch
 numpy
 pandas
 tqdm
+dotenv
