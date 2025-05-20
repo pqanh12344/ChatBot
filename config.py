@@ -21,7 +21,7 @@ API_URL = "https://api-inference.huggingface.co/models/mistralai/Mixtral-8x7B-In
 API_KEY = HF_API_KEY  # Thay bằng API key thực tế hoặc sử dụng Streamlit secrets
 
 # Cấu hình mô hình
-MODEL_PATH = 'halong_embedding'
+MODEL_PATH = 'hiieu/halong_embedding'
 CHUNK_SIZE = 256
 CHUNK_OVERLAP = 20
 BATCH_SIZE = 4
