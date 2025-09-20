@@ -67,12 +67,14 @@ torch
 numpy
 pandas
 tqdm
+dotenv
+qdrant_client
 ```
 
 ## Usage
 1. **Run the Application**:
    ```bash
-   streamlit run ui.py
+   streamlit run app_with_qdrant.py
    ```
    This will launch the Streamlit web interface in your default browser.
 
@@ -88,6 +90,8 @@ tqdm
 ```plaintext
 ├── app.py                  # Main application script
 ├── app_with_data_pdf.py    # Script for load PDF data
+├── app_with_qdrant.py      # Script for load qdrant
+├── chatbot_qdrant.py       # function application with qdrant
 ├── chatbot.py              # function application
 ├── config.py               # config, model_path, API model of application
 ├── data_loader.py          # Load Data
@@ -97,6 +101,8 @@ tqdm
 │   ├── viquad.questions
 │   ├── viquad.answers
 ├── requirements.txt        # Dependencies
+├── Dockerfile
+├── docker-compose.yml
 └── README.md               # This file
 ```
 
