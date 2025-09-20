@@ -133,9 +133,10 @@ qdrant_client
 - GPU acceleration for faster embedding and inference.
 - Enhanced UI with real-time typing indicators and richer formatting.
 
+## Demo
+![Logo](data/sbbsb.png)
+
 ## Contact
 For questions or feedback, please open an issue on the repository or contact the maintainers.
-
-![Logo](data/sbbsb.png)
 ---
 Built with ❤️ by Phan Quoc Anh
