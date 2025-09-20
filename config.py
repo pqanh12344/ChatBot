@@ -8,6 +8,8 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 HF_API_KEY = os.getenv("HF_API_KEY")
+PATH_QDRANT_URL = os.getenv("PATH_QDRANT_URL")
+API_KEY_QDRANT = os.getenv("API_KEY_QDRANT")
 if not HF_API_KEY:
     raise ValueError("HF_API_KEY not found")
 
@@ -22,7 +24,12 @@ API_KEY = HF_API_KEY  # Thay bằng API key thực tế hoặc sử dụng Strea
 
 # Cấu hình mô hình
 MODEL_PATH = 'hiieu/halong_embedding'
+# MODEL_PATH = 'halong_embedding'
 CHUNK_SIZE = 256
 CHUNK_OVERLAP = 20
 BATCH_SIZE = 4
 TOP_K = 30
+
+QDRANT_URL = PATH_QDRANT_URL   # Thay bằng Endpoint của bạn
+QDRANT_API_KEY = API_KEY_QDRANT              
+VECTOR_SIZE = 768

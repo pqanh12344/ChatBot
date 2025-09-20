@@ -5,6 +5,12 @@ from typing import List, Tuple
 import requests
 from sentence_transformers import SentenceTransformer
 from config import logger, API_URL, API_KEY, TOP_K
+import sys
+import asyncio
+
+if sys.platform.startswith("win"):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 
 def query(payload):
     """Gửi yêu cầu đến API Hugging Face."""
@@ -78,6 +84,8 @@ def answer_question(query: str, documents: List[str], doc_embeddings: np.ndarray
         )
 
         answer = generate_answer(prompt)
+        print(answer)
+
 
         elapsed_time = time.time() - start_time
         if elapsed_time < 1:

@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+  # qdrant:
+  #   image: qdrant/qdrant:v1.4.0
+  #   container_name: qdrant
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6333:6333"
+  #   volumes:
+  #     - qdrant_data:/qdrant/storage
+
+  app:
+    build: .
+    container_name: chatbot_app
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    # environment:
+    #   - QDRANT_URL=http://qdrant:6333
+    #   - QDRANT_API_KEY=your_api_key_here
+    #   - COLLECTION_NAME=halong_collection
+    #   - VECTOR_SIZE=384
+    # depends_on:
+    #   - qdrant
+
+# volumes:
+#   qdrant_data:

@@ -48,6 +48,7 @@ This project implements a **Retrieval-Augmented Generation (RAG)** chatbot using
    ```
 
 4. **Prepare Data**:
+   - download data from https://www.kaggle.com/datasets/nguyendolikeyou/uit-viquad/data and process (`viquad.contexts`, `viquad.questions`, `viquad.answers`)
    - Place your dataset files (`viquad.contexts`, `viquad.questions`, `viquad.answers`) in the `./data/` directory.
    - Ensure the files are in UTF-8 encoded text format with one entry per line.
 
