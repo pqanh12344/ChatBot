@@ -69,6 +69,7 @@ pandas
 tqdm
 dotenv
 qdrant_client
+redis
 ```
 
 ## Usage
@@ -89,6 +90,7 @@ qdrant_client
 ## Project Structure
 ```plaintext
 ├── app.py                  # Main application script
+├── api.py                  # Main flask API integrate with Slack
 ├── app_with_data_pdf.py    # Script for load PDF data
 ├── app_with_qdrant.py      # Script for load qdrant
 ├── chatbot_qdrant.py       # function application with qdrant
