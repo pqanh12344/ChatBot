@@ -1,12 +1,11 @@
-import time
 import numpy as np
 from typing import List, Tuple
-import requests
 from sentence_transformers import SentenceTransformer
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as rest
 from qdrant_client.http.models import VectorParams, Distance
-from config import logger, API_URL, API_KEY, TOP_K, QDRANT_URL, QDRANT_API_KEY, COLLECTION_NAME, VECTOR_SIZE
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from config import logger, TOP_K, QDRANT_URL, QDRANT_API_KEY, COLLECTION_NAME, VECTOR_SIZE
 
 # ================== KẾT NỐI QDRANT ==================
 def connect_qdrant(url: str, api_key: str) -> QdrantClient:
@@ -25,34 +24,43 @@ def create_collection_if_not_exists(client: QdrantClient, collection_name: str, 
     else:
         print(f"Collection '{collection_name}' đã tồn tại.")
 
-# ================== HUGGINGFACE API ==================
-def query_api(payload: dict) -> dict:
-    headers = {"Authorization": f"Bearer {API_KEY}"}
-    resp = requests.post(API_URL, headers=headers, json=payload)
-    return resp.json()
+# ================== LOAD LOCAL QWEN2 LLM ==================
+tokenizer = AutoTokenizer.from_pretrained("Qwen2-0.5B-Instruct")
+model = AutoModelForCausalLM.from_pretrained(
+    "Qwen2-0.5B-Instruct",
+    device_map="auto",
+    torch_dtype="auto"
+)
+qwen_pipeline = pipeline(
+    "text-generation",
+    model=model,
+    tokenizer=tokenizer,
+    max_new_tokens=1000,
+    temperature=0.3,
+    top_p=0.9
+)
 
+# ================== GENERATE ANSWER ==================
 def generate_answer(prompt: str) -> str:
-    payload = {
-        "inputs": prompt + "\nTrả lời:",
-        "parameters": {
-            "max_new_tokens": 1000,
-            "temperature": 0.3,
-            "top_p": 0.9,
-            "do_sample": True,
-            "num_beams": 2
-        }
-    }
-    output = query_api(payload)
-    if isinstance(output, dict) and "error" in output:
-        return f"API error: {output['error']}"
-    elif isinstance(output, list) and len(output) > 0 and "generated_text" in output[0]:
-        generated_text = output[0]["generated_text"].strip()
-        idx = generated_text.find("\nTrả lời:")
+    try:
+        output = qwen_pipeline(
+            prompt,
+            max_new_tokens=50,  # chỉ cần đủ để trả lời ngắn
+            do_sample=False      # deterministic
+        )[0]["generated_text"]
+
+        # Tách câu trả lời sau marker "Answer:"
+        idx = output.find("Answer:")
         if idx != -1:
-            return generated_text[idx + len("\nTrả lời:"):].strip()
-        return generated_text
-    else:
-        return "Error: Unexpected API response."
+            answer = output[idx + len("Answer:"):].strip()
+        else:
+            answer = output.strip()
+
+        # Loại bỏ prompt lặp lại nếu model chèn vào
+        answer = answer.replace(prompt, "").strip()
+        return answer
+    except Exception as e:
+        return f"LLM error: {e}"
 
 # ================== UPLOAD DOCUMENTS (KHÔNG METADATA) ==================
 def upload_documents_to_qdrant(client: QdrantClient, collection_name: str, chunks: List[str], embeddings: np.ndarray):
@@ -78,10 +86,12 @@ def answer_question(client: QdrantClient, query: str, model: SentenceTransformer
     if not retrieved_docs:
         return "Không tìm thấy tài liệu liên quan."
     context = " ".join(retrieved_docs[:10])
+    
     prompt = (
-        f"Bạn là một chuyên gia thông tin, luôn cung cấp câu trả lời chính xác.\n"
         f"Dựa trên thông tin sau: {context}\n"
         f"Câu hỏi: {query}\n"
+        f"Vui lòng chỉ trả lời một câu ngắn gọn, tuyệt đối không giải thích gì thêm.\n"
+        f"Answer:"
     )
     return generate_answer(prompt)
 
@@ -96,24 +106,25 @@ def chatbot_rag(client: QdrantClient, query: str, model: SentenceTransformer) ->
 
 # ================== EXAMPLE USAGE ==================
 if __name__ == "__main__":
+    # Kết nối Qdrant
     client = connect_qdrant(QDRANT_URL, QDRANT_API_KEY)
     create_collection_if_not_exists(client, COLLECTION_NAME, VECTOR_SIZE)
 
     # Load embedding model
-    model = SentenceTransformer("halong_embedding")
+    embedding_model = SentenceTransformer("halong_embedding")
 
     # Ví dụ dữ liệu
     chunks = [
         "Hà Nội là thủ đô của Việt Nam.",
         "TP. Hồ Chí Minh nổi tiếng với chợ Bến Thành."
     ]
-    embeddings = model.encode(chunks, convert_to_numpy=True, normalize_embeddings=True)
+    embeddings = embedding_model.encode(chunks, convert_to_numpy=True, normalize_embeddings=True)
 
     # Upload lên Qdrant (không metadata)
     upload_documents_to_qdrant(client, COLLECTION_NAME, chunks, embeddings)
 
     # Chatbot RAG
     query = "Hà Nội là thủ đô của nước nào?"
-    answer, source = chatbot_rag(client, query, model)
+    answer, source = chatbot_rag(client, query, embedding_model)
     print("Answer:", answer)
-    print("Source:", source)
+    # print("Source:", source)

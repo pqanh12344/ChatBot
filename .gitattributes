@@ -1,1 +1,2 @@
 halong_embedding/* filter=lfs diff=lfs merge=lfs -text
+Qwen2-0.5B-Instruct/* filter=lfs diff=lfs merge=lfs -text

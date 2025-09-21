@@ -9,3 +9,4 @@ pandas
 tqdm
 dotenv
 qdrant_client
+redis
