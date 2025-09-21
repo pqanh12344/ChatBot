@@ -136,7 +136,7 @@ redis
 - Enhanced UI with real-time typing indicators and richer formatting.
 
 ## Demo
-![Logo](data/sbbsb.png)
+![Logo](data/demo_chatbot_UI.gif)
 
 ## Contact
 For questions or feedback, please open an issue on the repository or contact the maintainers.
